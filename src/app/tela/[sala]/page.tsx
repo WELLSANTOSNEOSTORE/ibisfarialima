@@ -260,31 +260,34 @@ function Slide3({
   nomeSala: string;
 }) {
   return (
-    <div className="w-full h-full bg-white flex flex-col items-center justify-center gap-10 px-16">
+    <div className="w-full h-full bg-white flex flex-col items-center justify-center gap-8 px-20">
       {logoCliente ? (
-        <Image
-          src={logoCliente}
-          alt={nomeCliente ?? "Logo cliente"}
-          width={520}
-          height={260}
-          className="object-contain max-h-56"
-          unoptimized
-          priority
-        />
+        <div className="flex-1 flex items-center justify-center w-full min-h-0 py-8">
+          <Image
+            src={logoCliente}
+            alt={nomeCliente ?? "Logo cliente"}
+            width={900}
+            height={500}
+            className="object-contain w-full h-full"
+            style={{ maxHeight: "60vh" }}
+            unoptimized
+            priority
+          />
+        </div>
       ) : (
         <div className="w-72 h-36 rounded-2xl bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
           <p className="text-gray-400 text-sm font-medium">Logo do cliente</p>
         </div>
       )}
 
-      <div className="text-center">
+      <div className="text-center shrink-0">
         {nomeCliente && (
-          <p className="text-2xl text-gray-400 font-light mb-3">{nomeCliente}</p>
+          <p className="text-3xl text-gray-400 font-light mb-3">{nomeCliente}</p>
         )}
         <div className="inline-flex items-center gap-4">
-          <div className="h-px w-14 bg-[#E8440A]" />
-          <p className="text-4xl font-black text-gray-800 tracking-wide">{nomeSala}</p>
-          <div className="h-px w-14 bg-[#E8440A]" />
+          <div className="h-px w-16 bg-[#E8440A]" />
+          <p className="text-5xl font-black text-gray-800 tracking-wide">{nomeSala}</p>
+          <div className="h-px w-16 bg-[#E8440A]" />
         </div>
       </div>
     </div>
@@ -305,14 +308,14 @@ function SlideVideo({ videoUrl, active, onEnded }: { videoUrl: string; active: b
   }, [active]);
 
   return (
-    <div className="w-full h-full bg-black flex items-center justify-center">
+    <div className="w-full h-full bg-black">
       <video
         ref={videoRef}
         src={videoUrl}
         muted
         playsInline
         onEnded={onEnded}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-cover"
       />
     </div>
   );
