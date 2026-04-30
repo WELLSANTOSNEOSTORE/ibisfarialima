@@ -30,11 +30,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "salaId inválido" }, { status: 400 });
   }
 
-  const config = await prisma.salaConfig.upsert({
-    where: { salaId },
-    update: { mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
-    create: { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
-  });
+  const [config] = await Promise.all([
+    prisma.salaConfig.upsert({
+      where: { salaId },
+      update: { mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
+      create: { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
+    }),
+    // Auto-salva logo na biblioteca sempre que salvar com logo + nome preenchidos
+    logoCliente && nomeCliente
+      ? prisma.logoLibrary.upsert({
+          where: { url: logoCliente },
+          update: { nome: nomeCliente },
+          create: { nome: nomeCliente, url: logoCliente },
+        })
+      : Promise.resolve(null),
+  ]);
 
   return NextResponse.json(config);
 }

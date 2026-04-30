@@ -2,9 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const logos = await prisma.logoLibrary.findMany({
-    orderBy: { nome: "asc" },
-  });
+  // Busca logos da biblioteca + logos ativos nas salas (migração automática)
+  const [logos, salas] = await Promise.all([
+    prisma.logoLibrary.findMany({ orderBy: { nome: "asc" } }),
+    prisma.salaConfig.findMany({
+      where: { logoCliente: { not: null }, nomeCliente: { not: null } },
+    }),
+  ]);
+
+  const logoUrls = new Set(logos.map((l) => l.url));
+  const novos = salas.filter((s) => s.logoCliente && !logoUrls.has(s.logoCliente!));
+
+  if (novos.length > 0) {
+    await Promise.all(
+      novos.map((s) =>
+        prisma.logoLibrary.upsert({
+          where: { url: s.logoCliente! },
+          update: { nome: s.nomeCliente! },
+          create: { nome: s.nomeCliente!, url: s.logoCliente! },
+        })
+      )
+    );
+    const todos = await prisma.logoLibrary.findMany({ orderBy: { nome: "asc" } });
+    return NextResponse.json(todos);
+  }
+
   return NextResponse.json(logos);
 }
 
