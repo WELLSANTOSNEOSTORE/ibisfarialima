@@ -44,6 +44,7 @@ export default function AdminPage() {
   const [salvandoLogo, setSalvandoLogo] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadVideoProgress, setUploadVideoProgress] = useState(0);
+  const [uploadVideoError, setUploadVideoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -128,13 +129,17 @@ export default function AdminPage() {
     if (!file) return;
     setUploadingVideo(true);
     setUploadVideoProgress(0);
+    setUploadVideoError(null);
     try {
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/upload-video",
+        multipart: true,
         onUploadProgress: ({ percentage }) => setUploadVideoProgress(Math.round(percentage)),
       });
       setConfig((prev) => ({ ...prev, videoUrl: blob.url }));
+    } catch (err) {
+      setUploadVideoError(err instanceof Error ? err.message : "Erro ao enviar vídeo. Tente novamente.");
     } finally {
       setUploadingVideo(false);
       setUploadVideoProgress(0);
@@ -418,6 +423,9 @@ export default function AdminPage() {
                     onChange={handleVideoFileChange}
                     className="hidden"
                   />
+                  {uploadVideoError && (
+                    <p className="mt-2 text-xs text-red-500">{uploadVideoError}</p>
+                  )}
                 </div>
 
                 {/* Separador */}
