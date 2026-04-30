@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 
@@ -12,9 +12,11 @@ interface SalaConfig {
   logoCliente: string | null;
   nomeCliente: string | null;
   mostrarInfoEvento: boolean;
+  videoUrl: string | null;
+  mostrarVideo: boolean;
 }
 
-const DURATIONS = [6000, 5000, 5000];
+const DURATIONS = [6000, 5000, 5000, 15000];
 
 const NOME_SALA: Record<string, string> = {
   inter: "SALA INTER",
@@ -45,13 +47,16 @@ export default function TelaPage() {
   }, [fetchConfig]);
 
   useEffect(() => {
-    const totalSlides = config?.mostrarInfoEvento === false ? 2 : 3;
-    const duration = DURATIONS[slide] - 500;
+    const totalSlides =
+      2 +
+      (config?.mostrarInfoEvento ? 1 : 0) +
+      (config?.mostrarVideo && config?.videoUrl ? 1 : 0);
+    const duration = (DURATIONS[slide] ?? 5000) - 500;
     const t = setTimeout(() => {
       setSlide((prev: number) => (prev + 1) % totalSlides);
     }, duration);
     return () => clearTimeout(t);
-  }, [slide, config?.mostrarInfoEvento]);
+  }, [slide, config?.mostrarInfoEvento, config?.mostrarVideo, config?.videoUrl]);
 
   if (!config) {
     return (
@@ -61,7 +66,12 @@ export default function TelaPage() {
     );
   }
 
-  const totalSlides = config.mostrarInfoEvento ? 3 : 2;
+  const totalSlides =
+    2 +
+    (config.mostrarInfoEvento ? 1 : 0) +
+    (config.mostrarVideo && config.videoUrl ? 1 : 0);
+  const slideEvento = 2;
+  const slideVideo = config.mostrarInfoEvento ? 3 : 2;
   const nomeSala = NOME_SALA[sala] ?? "SALA";
 
   return (
@@ -88,7 +98,7 @@ export default function TelaPage() {
       {config.mostrarInfoEvento && (
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
-            slide === 2 ? "opacity-100" : "opacity-0 pointer-events-none"
+            slide === slideEvento ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
           <Slide3
@@ -96,6 +106,17 @@ export default function TelaPage() {
             nomeCliente={config.nomeCliente}
             nomeSala={nomeSala}
           />
+        </div>
+      )}
+
+      {/* Slide Vídeo */}
+      {config.mostrarVideo && config.videoUrl && (
+        <div
+          className={`absolute inset-0 transition-opacity duration-500 ${
+            slide === slideVideo ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <SlideVideo videoUrl={config.videoUrl} active={slide === slideVideo} />
         </div>
       )}
 
@@ -258,6 +279,33 @@ function Slide3({
           <div className="h-px w-14 bg-[#E8440A]" />
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── SLIDE VÍDEO ── */
+function SlideVideo({ videoUrl, active }: { videoUrl: string; active: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (active) {
+      videoRef.current?.play().catch(() => {});
+    } else {
+      videoRef.current?.pause();
+      if (videoRef.current) videoRef.current.currentTime = 0;
+    }
+  }, [active]);
+
+  return (
+    <div className="w-full h-full bg-black flex items-center justify-center">
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        muted
+        loop
+        playsInline
+        className="w-full h-full object-contain"
+      />
     </div>
   );
 }

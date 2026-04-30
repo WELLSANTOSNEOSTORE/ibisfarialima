@@ -11,6 +11,8 @@ interface SalaConfig {
   logoCliente: string | null;
   nomeCliente: string | null;
   mostrarInfoEvento: boolean;
+  videoUrl: string | null;
+  mostrarVideo: boolean;
 }
 
 interface LogoLibrary {
@@ -25,6 +27,8 @@ const defaultConfig = (salaId: SalaId): SalaConfig => ({
   logoCliente: null,
   nomeCliente: null,
   mostrarInfoEvento: true,
+  videoUrl: null,
+  mostrarVideo: false,
 });
 
 export default function AdminPage() {
@@ -331,7 +335,7 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Toggle */}
+              {/* Toggle — Evento */}
               <div className="flex items-center justify-between py-4 border-t border-gray-100">
                 <div>
                   <p className="text-sm font-semibold text-gray-700">Mostrar informações do evento?</p>
@@ -345,6 +349,65 @@ export default function AdminPage() {
                 >
                   <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${config.mostrarInfoEvento ? "translate-x-7" : "translate-x-1"}`} />
                 </button>
+              </div>
+
+              {/* Seção de Vídeo */}
+              <div className="pt-2 border-t border-gray-100 space-y-4">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
+                  Vídeo
+                </label>
+
+                {/* Input de URL */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2">URL do vídeo (MP4, WebM…)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={config.videoUrl ?? ""}
+                      onChange={(e) => setConfig((prev) => ({ ...prev, videoUrl: e.target.value || null }))}
+                      placeholder="https://exemplo.com/video.mp4"
+                      className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E8440A] focus:border-transparent transition text-sm"
+                    />
+                    {config.videoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setConfig((prev) => ({ ...prev, videoUrl: null, mostrarVideo: false }))}
+                        className="px-3 py-2 text-xs text-red-400 hover:text-red-600 border border-gray-200 rounded-xl transition"
+                      >
+                        Remover
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Preview do vídeo */}
+                {config.videoUrl && (
+                  <div className="rounded-xl overflow-hidden border border-gray-200 bg-black">
+                    <video
+                      key={config.videoUrl}
+                      src={config.videoUrl}
+                      controls
+                      muted
+                      className="w-full max-h-48 object-contain"
+                    />
+                  </div>
+                )}
+
+                {/* Toggle — Vídeo */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Mostrar vídeo?</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Exibe o vídeo como slide extra na tela</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setConfig((prev) => ({ ...prev, mostrarVideo: !prev.mostrarVideo }))}
+                    style={{ width: "52px" }}
+                    className={`relative inline-flex h-7 items-center rounded-full transition-colors duration-200 focus:outline-none ${config.mostrarVideo ? "bg-[#E8440A]" : "bg-gray-200"}`}
+                  >
+                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${config.mostrarVideo ? "translate-x-7" : "translate-x-1"}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Botões */}

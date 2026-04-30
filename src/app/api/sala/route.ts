@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento } = body;
+  const { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo } = body;
 
   if (!salaId || !["inter", "rooftop"].includes(salaId)) {
     return NextResponse.json({ error: "salaId inválido" }, { status: 400 });
@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
 
   const config = await prisma.salaConfig.upsert({
     where: { salaId },
-    update: { mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento },
-    create: { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento },
+    update: { mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
+    create: { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
   });
 
   return NextResponse.json(config);
