@@ -23,6 +23,7 @@ model SalaConfig {
   mostrarInfoEvento  Boolean  @default(true)
   videoUrl           String?
   mostrarVideo       Boolean  @default(false)
+  orientacao         String   @default("landscape")
   updatedAt          DateTime @updatedAt
   createdAt          DateTime @default(now())
 }

@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo } = body;
+  const { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo, orientacao } = body;
 
   if (!salaId || !["inter", "rooftop"].includes(salaId)) {
     return NextResponse.json({ error: "salaId inválido" }, { status: 400 });
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
   const [config] = await Promise.all([
     prisma.salaConfig.upsert({
       where: { salaId },
-      update: { mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
-      create: { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo },
+      update: { mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo, orientacao },
+      create: { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo, orientacao },
     }),
     // Auto-salva logo na biblioteca sempre que salvar com logo + nome preenchidos
     logoCliente && nomeCliente

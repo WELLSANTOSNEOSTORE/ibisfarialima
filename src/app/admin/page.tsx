@@ -6,6 +6,8 @@ import { upload } from "@vercel/blob/client";
 
 type SalaId = "inter" | "rooftop";
 
+type Orientacao = "landscape" | "portrait";
+
 interface SalaConfig {
   salaId: SalaId;
   mensagemBoasVindas: string;
@@ -14,6 +16,7 @@ interface SalaConfig {
   mostrarInfoEvento: boolean;
   videoUrl: string | null;
   mostrarVideo: boolean;
+  orientacao: Orientacao;
 }
 
 interface LogoLibrary {
@@ -30,6 +33,7 @@ const defaultConfig = (salaId: SalaId): SalaConfig => ({
   mostrarInfoEvento: true,
   videoUrl: null,
   mostrarVideo: false,
+  orientacao: "landscape",
 });
 
 export default function AdminPage() {
@@ -207,6 +211,48 @@ export default function AdminPage() {
               <option value="inter">Sala Inter</option>
               <option value="rooftop">Sala Rooftop</option>
             </select>
+          </div>
+
+          {/* Orientação da tela */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
+              Orientação da tela
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setConfig((prev) => ({ ...prev, orientacao: "landscape" }))}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
+                  config.orientacao === "landscape"
+                    ? "border-[#E8440A] bg-orange-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                {/* Ícone paisagem */}
+                <div className={`w-14 h-8 rounded border-2 ${config.orientacao === "landscape" ? "border-[#E8440A] bg-orange-100" : "border-gray-400 bg-gray-100"}`} />
+                <span className={`text-xs font-bold ${config.orientacao === "landscape" ? "text-[#E8440A]" : "text-gray-500"}`}>
+                  Horizontal
+                </span>
+                <span className="text-[10px] text-gray-400">1920 × 1080</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setConfig((prev) => ({ ...prev, orientacao: "portrait" }))}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
+                  config.orientacao === "portrait"
+                    ? "border-[#E8440A] bg-orange-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                {/* Ícone retrato */}
+                <div className={`w-8 h-14 rounded border-2 ${config.orientacao === "portrait" ? "border-[#E8440A] bg-orange-100" : "border-gray-400 bg-gray-100"}`} />
+                <span className={`text-xs font-bold ${config.orientacao === "portrait" ? "text-[#E8440A]" : "text-gray-500"}`}>
+                  Vertical
+                </span>
+                <span className="text-[10px] text-gray-400">1080 × 1920</span>
+              </button>
+            </div>
           </div>
 
           {loading ? (

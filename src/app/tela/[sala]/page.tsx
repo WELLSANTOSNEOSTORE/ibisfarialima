@@ -14,6 +14,7 @@ interface SalaConfig {
   mostrarInfoEvento: boolean;
   videoUrl: string | null;
   mostrarVideo: boolean;
+  orientacao: string;
 }
 
 const DURATIONS = [6000, 5000, 5000, 15000];
@@ -37,14 +38,20 @@ export default function TelaPage() {
     setSlide((prev) => (prev + 1) % total);
   }, []);
 
+  const isPortrait = config?.orientacao === "portrait";
+
   useEffect(() => {
     function updateScale() {
-      setScale(Math.min(window.innerWidth / W, window.innerHeight / H));
+      const portrait = config?.orientacao === "portrait";
+      // Em portrait, o canvas 1920×1080 é girado 90°, então ocupa 1080×1920 visualmente
+      const scaleX = portrait ? window.innerWidth / H : window.innerWidth / W;
+      const scaleY = portrait ? window.innerHeight / W : window.innerHeight / H;
+      setScale(Math.min(scaleX, scaleY));
     }
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [config?.orientacao]);
 
   const fetchConfig = useCallback(async () => {
     try {
@@ -97,7 +104,9 @@ export default function TelaPage() {
         style={{
           width: W,
           height: H,
-          transform: `scale(${scale})`,
+          transform: isPortrait
+            ? `rotate(90deg) scale(${scale})`
+            : `scale(${scale})`,
           transformOrigin: "center center",
           position: "relative",
           overflow: "hidden",
