@@ -13,6 +13,12 @@ interface SalaConfig {
   mostrarInfoEvento: boolean;
 }
 
+interface LogoLibrary {
+  id: number;
+  nome: string;
+  url: string;
+}
+
 const defaultConfig = (salaId: SalaId): SalaConfig => ({
   salaId,
   mensagemBoasVindas: "BEM-VINDO!",
@@ -29,11 +35,17 @@ export default function AdminPage() {
   const [saved, setSaved] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [buscarLogoSistema, setBuscarLogoSistema] = useState(false);
+  const [logos, setLogos] = useState<LogoLibrary[]>([]);
+  const [salvandoLogo, setSalvandoLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchConfig(sala);
   }, [sala]);
+
+  useEffect(() => {
+    if (buscarLogoSistema) fetchLogos();
+  }, [buscarLogoSistema]);
 
   async function fetchConfig(salaId: SalaId) {
     setLoading(true);
@@ -47,6 +59,12 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function fetchLogos() {
+    const res = await fetch("/api/logos");
+    const data: LogoLibrary[] = await res.json();
+    setLogos(data);
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -75,6 +93,36 @@ export default function AdminPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleSalvarNoSistema() {
+    if (!config.logoCliente || !config.nomeCliente) return;
+    setSalvandoLogo(true);
+    try {
+      await fetch("/api/logos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: config.nomeCliente, url: config.logoCliente }),
+      });
+      await fetchLogos();
+    } finally {
+      setSalvandoLogo(false);
+    }
+  }
+
+  async function handleDeletarLogo(id: number) {
+    await fetch(`/api/logos?id=${id}`, { method: "DELETE" });
+    setLogos((prev) => prev.filter((l) => l.id !== id));
+  }
+
+  function handleSelecionarLogo(logo: LogoLibrary) {
+    setLogoPreview(logo.url);
+    setConfig((prev) => ({
+      ...prev,
+      logoCliente: logo.url,
+      nomeCliente: prev.nomeCliente || logo.nome,
+    }));
+    setBuscarLogoSistema(false);
   }
 
   const nomeSala = sala === "inter" ? "Sala Inter" : "Sala Rooftop";
@@ -107,6 +155,7 @@ export default function AdminPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-7">
+          {/* Sala */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Sala</label>
             <select
@@ -125,6 +174,7 @@ export default function AdminPage() {
             </div>
           ) : (
             <>
+              {/* Mensagem */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
                   Mensagem de boas-vindas
@@ -138,6 +188,7 @@ export default function AdminPage() {
                 />
               </div>
 
+              {/* Nome do cliente */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
                   Nome do cliente / evento
@@ -151,6 +202,7 @@ export default function AdminPage() {
                 />
               </div>
 
+              {/* Checkbox buscar logo no sistema */}
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -165,6 +217,56 @@ export default function AdminPage() {
                 </label>
               </div>
 
+              {/* Lista de logos do sistema */}
+              {buscarLogoSistema && (
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                      Logos salvos no sistema
+                    </p>
+                  </div>
+                  {logos.length === 0 ? (
+                    <div className="px-4 py-8 text-center">
+                      <p className="text-sm text-gray-400">Nenhum logo salvo ainda.</p>
+                      <p className="text-xs text-gray-300 mt-1">
+                        Faça upload de uma logo e clique em "Salvar no sistema".
+                      </p>
+                    </div>
+                  ) : (
+                    <ul className="divide-y divide-gray-100">
+                      {logos.map((logo) => (
+                        <li key={logo.id} className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition">
+                          <Image
+                            src={logo.url}
+                            alt={logo.nome}
+                            width={64}
+                            height={32}
+                            className="object-contain h-8 w-16 rounded"
+                            unoptimized
+                          />
+                          <span className="flex-1 text-sm font-semibold text-gray-700 truncate">
+                            {logo.nome}
+                          </span>
+                          <button
+                            onClick={() => handleSelecionarLogo(logo)}
+                            className="text-xs font-bold text-[#E8440A] hover:underline"
+                          >
+                            Usar
+                          </button>
+                          <button
+                            onClick={() => handleDeletarLogo(logo.id)}
+                            className="text-xs text-gray-300 hover:text-red-400 transition"
+                          >
+                            ✕
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              {/* Upload de logo */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
                   Logo do cliente
@@ -193,17 +295,34 @@ export default function AdminPage() {
                   )}
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={handleFileChange} className="hidden" />
+
                 {logoPreview && (
-                  <button
-                    type="button"
-                    onClick={() => { setLogoPreview(null); setConfig((prev) => ({ ...prev, logoCliente: null })); }}
-                    className="mt-2 text-xs text-red-400 hover:text-red-600 transition"
-                  >
-                    Remover logo
-                  </button>
+                  <div className="mt-2 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setLogoPreview(null); setConfig((prev) => ({ ...prev, logoCliente: null })); }}
+                      className="text-xs text-red-400 hover:text-red-600 transition"
+                    >
+                      Remover logo
+                    </button>
+                    {config.nomeCliente && (
+                      <>
+                        <span className="text-gray-200">|</span>
+                        <button
+                          type="button"
+                          onClick={handleSalvarNoSistema}
+                          disabled={salvandoLogo}
+                          className="text-xs text-[#E8440A] hover:underline disabled:opacity-50 transition"
+                        >
+                          {salvandoLogo ? "Salvando..." : "Salvar no sistema"}
+                        </button>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
 
+              {/* Toggle */}
               <div className="flex items-center justify-between py-4 border-t border-gray-100">
                 <div>
                   <p className="text-sm font-semibold text-gray-700">Mostrar informações do evento?</p>
@@ -219,6 +338,7 @@ export default function AdminPage() {
                 </button>
               </div>
 
+              {/* Botões */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleSave}
