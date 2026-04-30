@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+async function upsertLogo(nome: string, url: string) {
+  const existing = await prisma.logoLibrary.findFirst({ where: { url } });
+  if (existing) {
+    return prisma.logoLibrary.update({ where: { id: existing.id }, data: { nome } });
+  }
+  return prisma.logoLibrary.create({ data: { nome, url } });
+}
+
 export async function GET() {
-  // Busca logos da biblioteca + logos ativos nas salas (migração automática)
   const [logos, salas] = await Promise.all([
     prisma.logoLibrary.findMany({ orderBy: { nome: "asc" } }),
     prisma.salaConfig.findMany({
@@ -14,15 +21,7 @@ export async function GET() {
   const novos = salas.filter((s) => s.logoCliente && !logoUrls.has(s.logoCliente!));
 
   if (novos.length > 0) {
-    await Promise.all(
-      novos.map((s) =>
-        prisma.logoLibrary.upsert({
-          where: { url: s.logoCliente! },
-          update: { nome: s.nomeCliente! },
-          create: { nome: s.nomeCliente!, url: s.logoCliente! },
-        })
-      )
-    );
+    await Promise.all(novos.map((s) => upsertLogo(s.nomeCliente!, s.logoCliente!)));
     const todos = await prisma.logoLibrary.findMany({ orderBy: { nome: "asc" } });
     return NextResponse.json(todos);
   }
@@ -38,12 +37,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "nome e url são obrigatórios" }, { status: 400 });
   }
 
-  const logo = await prisma.logoLibrary.upsert({
-    where: { url },
-    update: { nome },
-    create: { nome, url },
-  });
-
+  const logo = await upsertLogo(nome, url);
   return NextResponse.json(logo);
 }
 

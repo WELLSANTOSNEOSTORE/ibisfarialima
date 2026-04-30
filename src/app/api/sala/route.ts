@@ -38,11 +38,11 @@ export async function POST(req: NextRequest) {
     }),
     // Auto-salva logo na biblioteca sempre que salvar com logo + nome preenchidos
     logoCliente && nomeCliente
-      ? prisma.logoLibrary.upsert({
-          where: { url: logoCliente },
-          update: { nome: nomeCliente },
-          create: { nome: nomeCliente, url: logoCliente },
-        })
+      ? prisma.logoLibrary.findFirst({ where: { url: logoCliente } }).then((existing) =>
+          existing
+            ? prisma.logoLibrary.update({ where: { id: existing.id }, data: { nome: nomeCliente } })
+            : prisma.logoLibrary.create({ data: { nome: nomeCliente, url: logoCliente } })
+        )
       : Promise.resolve(null),
   ]);
 
