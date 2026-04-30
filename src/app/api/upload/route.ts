@@ -13,14 +13,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Formato inválido. Use PNG ou JPG." }, { status: 400 });
   }
 
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (file.size > maxSize) {
+  if (file.size > 5 * 1024 * 1024) {
     return NextResponse.json({ error: "Arquivo muito grande. Máximo 5MB." }, { status: 400 });
   }
 
   const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
+  const base64 = `data:${file.type};base64,${Buffer.from(bytes).toString("base64")}`;
 
   return NextResponse.json({ url: base64 });
 }

@@ -52,13 +52,10 @@ export default function AdminPage() {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const form = new FormData();
     form.append("file", file);
-
     const res = await fetch("/api/upload", { method: "POST", body: form });
     const data = await res.json();
-
     if (data.url) {
       setLogoPreview(data.url);
       setConfig((prev) => ({ ...prev, logoCliente: data.url }));
@@ -80,36 +77,20 @@ export default function AdminPage() {
     }
   }
 
-  function openTela() {
-    window.open(`/tela/${sala}`, "_blank");
-  }
-
   const nomeSala = sala === "inter" ? "Sala Inter" : "Sala Rooftop";
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Logo Ibis Styles — placeholder com texto estilizado */}
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-[#E8440A] flex items-center justify-center">
-                <span className="text-white font-black text-xs leading-none text-center">
-                  ibis
-                </span>
-              </div>
-              <div>
-                <p className="text-[11px] text-gray-400 uppercase tracking-widest leading-none">
-                  Hotel
-                </p>
-                <p className="text-lg font-black text-gray-800 leading-tight">
-                  ibis Styles
-                </p>
-                <p className="text-[10px] text-gray-500 tracking-wider leading-none">
-                  FARIA LIMA
-                </p>
-              </div>
+        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#E8440A] flex items-center justify-center">
+              <span className="text-white font-black text-xs">ibis</span>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Hotel</p>
+              <p className="text-lg font-black text-gray-800 leading-tight">ibis Styles</p>
+              <p className="text-[10px] text-gray-500 tracking-wider leading-none">FARIA LIMA</p>
             </div>
           </div>
           <div className="text-right">
@@ -119,22 +100,15 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
+      <main className="max-w-2xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-800 tracking-tight">
-            OLÁ, IBIS FARIA LIMA
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Configure as informações exibidas na tela de cada sala.
-          </p>
+          <h1 className="text-3xl font-black text-gray-800 tracking-tight">OLÁ, IBIS FARIA LIMA</h1>
+          <p className="text-gray-400 text-sm mt-1">Configure as informações exibidas na tela de cada sala.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8">
-          {/* Seleção de sala */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-7">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
-              Sala
-            </label>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Sala</label>
             <select
               value={sala}
               onChange={(e) => setSala(e.target.value as SalaId)}
@@ -151,7 +125,6 @@ export default function AdminPage() {
             </div>
           ) : (
             <>
-              {/* Mensagem de boas-vindas */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
                   Mensagem de boas-vindas
@@ -159,15 +132,12 @@ export default function AdminPage() {
                 <input
                   type="text"
                   value={config.mensagemBoasVindas}
-                  onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, mensagemBoasVindas: e.target.value }))
-                  }
+                  onChange={(e) => setConfig((prev) => ({ ...prev, mensagemBoasVindas: e.target.value }))}
                   placeholder="BEM-VINDO!"
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E8440A] focus:border-transparent transition"
                 />
               </div>
 
-              {/* Nome do cliente */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
                   Nome do cliente / evento
@@ -175,15 +145,12 @@ export default function AdminPage() {
                 <input
                   type="text"
                   value={config.nomeCliente ?? ""}
-                  onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, nomeCliente: e.target.value }))
-                  }
+                  onChange={(e) => setConfig((prev) => ({ ...prev, nomeCliente: e.target.value }))}
                   placeholder="Ex: Empresa XPTO"
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E8440A] focus:border-transparent transition"
                 />
               </div>
 
-              {/* Checkbox buscar logo */}
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -192,16 +159,12 @@ export default function AdminPage() {
                   onChange={(e) => setBuscarLogoSistema(e.target.checked)}
                   className="w-5 h-5 accent-[#E8440A] cursor-pointer"
                 />
-                <label
-                  htmlFor="buscarLogo"
-                  className="text-sm text-gray-600 cursor-pointer select-none"
-                >
+                <label htmlFor="buscarLogo" className="text-sm text-gray-600 cursor-pointer select-none">
                   Procurar logo no sistema?{" "}
                   <span className="text-gray-400">(caso seja cliente recorrente)</span>
                 </label>
               </div>
 
-              {/* Upload de logo */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
                   Logo do cliente
@@ -212,58 +175,28 @@ export default function AdminPage() {
                 >
                   {logoPreview ? (
                     <div className="flex flex-col items-center gap-3">
-                      <Image
-                        src={logoPreview}
-                        alt="Logo preview"
-                        width={180}
-                        height={90}
-                        className="object-contain max-h-24"
-                        unoptimized
-                      />
-                      <p className="text-xs text-gray-400 group-hover:text-[#E8440A] transition">
-                        Clique para trocar
-                      </p>
+                      <Image src={logoPreview} alt="Logo preview" width={180} height={90} className="object-contain max-h-24" unoptimized />
+                      <p className="text-xs text-gray-400 group-hover:text-[#E8440A] transition">Clique para trocar</p>
                     </div>
                   ) : (
                     <>
                       <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-orange-50 transition">
-                        <svg
-                          className="w-7 h-7 text-gray-400 group-hover:text-[#E8440A] transition"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                          />
+                        <svg className="w-7 h-7 text-gray-400 group-hover:text-[#E8440A] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-gray-600 group-hover:text-[#E8440A] transition">
-                          Clique para fazer upload
-                        </p>
+                        <p className="text-sm font-semibold text-gray-600 group-hover:text-[#E8440A] transition">Clique para fazer upload</p>
                         <p className="text-xs text-gray-400 mt-0.5">PNG, JPG até 5MB</p>
                       </div>
                     </>
                   )}
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/webp"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
+                <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={handleFileChange} className="hidden" />
                 {logoPreview && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setLogoPreview(null);
-                      setConfig((prev) => ({ ...prev, logoCliente: null }));
-                    }}
+                    onClick={() => { setLogoPreview(null); setConfig((prev) => ({ ...prev, logoCliente: null })); }}
                     className="mt-2 text-xs text-red-400 hover:text-red-600 transition"
                   >
                     Remover logo
@@ -271,38 +204,21 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Toggle mostrar info */}
               <div className="flex items-center justify-between py-4 border-t border-gray-100">
                 <div>
-                  <p className="text-sm font-semibold text-gray-700">
-                    Mostrar informações do evento?
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Exibe logo e nome do cliente no slide 3
-                  </p>
+                  <p className="text-sm font-semibold text-gray-700">Mostrar informações do evento?</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Exibe logo e nome do cliente no slide 3</p>
                 </div>
                 <button
                   type="button"
-                  onClick={() =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      mostrarInfoEvento: !prev.mostrarInfoEvento,
-                    }))
-                  }
-                  className={`relative inline-flex h-7 w-13 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                    config.mostrarInfoEvento ? "bg-[#E8440A]" : "bg-gray-200"
-                  }`}
+                  onClick={() => setConfig((prev) => ({ ...prev, mostrarInfoEvento: !prev.mostrarInfoEvento }))}
                   style={{ width: "52px" }}
+                  className={`relative inline-flex h-7 items-center rounded-full transition-colors duration-200 focus:outline-none ${config.mostrarInfoEvento ? "bg-[#E8440A]" : "bg-gray-200"}`}
                 >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                      config.mostrarInfoEvento ? "translate-x-7" : "translate-x-1"
-                    }`}
-                  />
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${config.mostrarInfoEvento ? "translate-x-7" : "translate-x-1"}`} />
                 </button>
               </div>
 
-              {/* Botões */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleSave}
@@ -318,13 +234,10 @@ export default function AdminPage() {
                       </svg>
                       Salvo!
                     </>
-                  ) : (
-                    "Salvar"
-                  )}
+                  ) : "Salvar"}
                 </button>
-
                 <button
-                  onClick={openTela}
+                  onClick={() => window.open(`/tela/${sala}`, "_blank")}
                   className="flex-1 bg-[#1a2e4a] hover:bg-[#243d61] text-white font-bold py-3.5 px-6 rounded-xl transition flex items-center justify-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
