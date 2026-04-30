@@ -99,18 +99,21 @@ export default function TelaPage() {
   const nomeSala = NOME_SALA[sala] ?? "SALA";
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-black flex items-center justify-center">
+    <div className="w-screen h-screen overflow-hidden bg-black" style={{ position: "relative" }}>
       <div
         style={{
           width: W,
           height: H,
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          marginLeft: -W / 2,
+          marginTop: -H / 2,
           transform: isPortrait
             ? `rotate(90deg) scale(${scale})`
             : `scale(${scale})`,
           transformOrigin: "center center",
-          position: "relative",
           overflow: "hidden",
-          flexShrink: 0,
         }}
       >
       {/* Slide 1 — Boas-vindas animada */}
