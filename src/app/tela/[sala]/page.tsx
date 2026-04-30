@@ -26,6 +26,8 @@ const NOME_SALA: Record<string, string> = {
 
 const W = 1920;
 const H = 1080;
+const WP = 1080; // portrait width
+const HP = 1920; // portrait height
 
 export default function TelaPage() {
   const params = useParams();
@@ -43,10 +45,9 @@ export default function TelaPage() {
   useEffect(() => {
     function updateScale() {
       const portrait = config?.orientacao === "portrait";
-      // Em portrait, o canvas 1920×1080 é girado 90°, então ocupa 1080×1920 visualmente
-      const scaleX = portrait ? window.innerWidth / H : window.innerWidth / W;
-      const scaleY = portrait ? window.innerHeight / W : window.innerHeight / H;
-      setScale(Math.min(scaleX, scaleY));
+      const cW = portrait ? WP : W;
+      const cH = portrait ? HP : H;
+      setScale(Math.min(window.innerWidth / cW, window.innerHeight / cH));
     }
     updateScale();
     window.addEventListener("resize", updateScale);
@@ -102,16 +103,14 @@ export default function TelaPage() {
     <div className="w-screen h-screen overflow-hidden bg-black" style={{ position: "relative" }}>
       <div
         style={{
-          width: W,
-          height: H,
+          width: isPortrait ? WP : W,
+          height: isPortrait ? HP : H,
           position: "absolute",
           top: "50%",
           left: "50%",
-          marginLeft: -W / 2,
-          marginTop: -H / 2,
-          transform: isPortrait
-            ? `rotate(90deg) scale(${scale})`
-            : `scale(${scale})`,
+          marginLeft: isPortrait ? -WP / 2 : -W / 2,
+          marginTop: isPortrait ? -HP / 2 : -H / 2,
+          transform: `scale(${scale})`,
           transformOrigin: "center center",
           overflow: "hidden",
         }}
