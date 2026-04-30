@@ -203,7 +203,7 @@ function Slide2({ nomeSala }: { nomeSala: string }) {
       <div className="flex justify-center items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/ibis-logo.png"
+          src="/images/ibis-logo.jpeg"
           alt="ibis Styles Faria Lima"
           className="object-contain h-48"
         />
