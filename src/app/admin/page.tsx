@@ -141,9 +141,18 @@ export default function AdminPage() {
               <p className="text-[10px] text-gray-500 tracking-wider leading-none">FARIA LIMA</p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end gap-1">
             <p className="text-xs text-gray-400 uppercase tracking-widest">Painel de</p>
             <p className="text-sm font-bold text-gray-700">Sinalização Digital</p>
+            <button
+              onClick={async () => {
+                await fetch("/api/auth", { method: "DELETE" });
+                window.location.href = "/admin/login";
+              }}
+              className="text-[10px] text-gray-400 hover:text-red-400 transition uppercase tracking-widest"
+            >
+              Sair
+            </button>
           </div>
         </div>
       </header>
