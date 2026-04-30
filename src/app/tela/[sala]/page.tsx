@@ -29,6 +29,9 @@ export default function TelaPage() {
 
   const [config, setConfig] = useState<SalaConfig | null>(null);
   const [slide, setSlide] = useState(0);
+  const advanceSlide = useCallback((total: number) => {
+    setSlide((prev) => (prev + 1) % total);
+  }, []);
 
   const fetchConfig = useCallback(async () => {
     try {
@@ -51,12 +54,13 @@ export default function TelaPage() {
       2 +
       (config?.mostrarInfoEvento ? 1 : 0) +
       (config?.mostrarVideo && config?.videoUrl ? 1 : 0);
+    const slideVideo = (config?.mostrarInfoEvento ? 3 : 2);
+    // Slide de vídeo avança pelo evento onEnded do próprio vídeo
+    if (config?.mostrarVideo && config?.videoUrl && slide === slideVideo) return;
     const duration = (DURATIONS[slide] ?? 5000) - 500;
-    const t = setTimeout(() => {
-      setSlide((prev: number) => (prev + 1) % totalSlides);
-    }, duration);
+    const t = setTimeout(() => advanceSlide(totalSlides), duration);
     return () => clearTimeout(t);
-  }, [slide, config?.mostrarInfoEvento, config?.mostrarVideo, config?.videoUrl]);
+  }, [slide, config?.mostrarInfoEvento, config?.mostrarVideo, config?.videoUrl, advanceSlide]);
 
   if (!config) {
     return (
@@ -116,7 +120,11 @@ export default function TelaPage() {
             slide === slideVideo ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
-          <SlideVideo videoUrl={config.videoUrl} active={slide === slideVideo} />
+          <SlideVideo
+            videoUrl={config.videoUrl}
+            active={slide === slideVideo}
+            onEnded={() => advanceSlide(totalSlides)}
+          />
         </div>
       )}
 
@@ -284,7 +292,7 @@ function Slide3({
 }
 
 /* ── SLIDE VÍDEO ── */
-function SlideVideo({ videoUrl, active }: { videoUrl: string; active: boolean }) {
+function SlideVideo({ videoUrl, active, onEnded }: { videoUrl: string; active: boolean; onEnded: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -302,8 +310,8 @@ function SlideVideo({ videoUrl, active }: { videoUrl: string; active: boolean })
         ref={videoRef}
         src={videoUrl}
         muted
-        loop
         playsInline
+        onEnded={onEnded}
         className="w-full h-full object-contain"
       />
     </div>
