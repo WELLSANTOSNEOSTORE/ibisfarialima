@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { upload } from "@vercel/blob/client";
 
 type SalaId = "inter" | "rooftop";
 
@@ -41,7 +42,10 @@ export default function AdminPage() {
   const [buscarLogoSistema, setBuscarLogoSistema] = useState(false);
   const [logos, setLogos] = useState<LogoLibrary[]>([]);
   const [salvandoLogo, setSalvandoLogo] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadVideoProgress, setUploadVideoProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchConfig(sala);
@@ -117,6 +121,25 @@ export default function AdminPage() {
   async function handleDeletarLogo(id: number) {
     await fetch(`/api/logos?id=${id}`, { method: "DELETE" });
     setLogos((prev) => prev.filter((l) => l.id !== id));
+  }
+
+  async function handleVideoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    setUploadVideoProgress(0);
+    try {
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload-video",
+        onUploadProgress: ({ percentage }) => setUploadVideoProgress(Math.round(percentage)),
+      });
+      setConfig((prev) => ({ ...prev, videoUrl: blob.url }));
+    } finally {
+      setUploadingVideo(false);
+      setUploadVideoProgress(0);
+      if (videoInputRef.current) videoInputRef.current.value = "";
+    }
   }
 
   function handleSelecionarLogo(logo: LogoLibrary) {
@@ -357,9 +380,55 @@ export default function AdminPage() {
                   Vídeo
                 </label>
 
+                {/* Upload de arquivo */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2">Upload do computador (MP4 até 500 MB)</label>
+                  <div
+                    className="border-2 border-dashed border-gray-200 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#E8440A] transition group"
+                    onClick={() => !uploadingVideo && videoInputRef.current?.click()}
+                  >
+                    {uploadingVideo ? (
+                      <div className="w-full flex flex-col items-center gap-2">
+                        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-2 bg-[#E8440A] rounded-full transition-all duration-300"
+                            style={{ width: `${uploadVideoProgress}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500">Enviando… {uploadVideoProgress}%</p>
+                      </div>
+                    ) : config.videoUrl ? (
+                      <p className="text-xs text-gray-400 group-hover:text-[#E8440A] transition">Clique para trocar o vídeo</p>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-orange-50 transition">
+                          <svg className="w-6 h-6 text-gray-400 group-hover:text-[#E8440A] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-600 group-hover:text-[#E8440A] transition">Clique para fazer upload</p>
+                        <p className="text-xs text-gray-400">MP4, WebM até 500 MB</p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onChange={handleVideoFileChange}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Separador */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-xs text-gray-400">ou cole uma URL</span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+
                 {/* Input de URL */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-2">URL do vídeo (MP4, WebM…)</label>
                   <div className="flex gap-2">
                     <input
                       type="url"
@@ -381,7 +450,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Preview do vídeo */}
-                {config.videoUrl && (
+                {config.videoUrl && !uploadingVideo && (
                   <div className="rounded-xl overflow-hidden border border-gray-200 bg-black">
                     <video
                       key={config.videoUrl}
