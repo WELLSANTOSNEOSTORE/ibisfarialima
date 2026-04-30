@@ -23,14 +23,27 @@ const NOME_SALA: Record<string, string> = {
   rooftop: "SALA ROOFTOP",
 };
 
+const W = 1920;
+const H = 1080;
+
 export default function TelaPage() {
   const params = useParams();
   const sala = params.sala as string;
 
   const [config, setConfig] = useState<SalaConfig | null>(null);
   const [slide, setSlide] = useState(0);
+  const [scale, setScale] = useState(1);
   const advanceSlide = useCallback((total: number) => {
     setSlide((prev) => (prev + 1) % total);
+  }, []);
+
+  useEffect(() => {
+    function updateScale() {
+      setScale(Math.min(window.innerWidth / W, window.innerHeight / H));
+    }
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
   }, []);
 
   const fetchConfig = useCallback(async () => {
@@ -79,7 +92,18 @@ export default function TelaPage() {
   const nomeSala = NOME_SALA[sala] ?? "SALA";
 
   return (
-    <div className="w-screen h-screen overflow-hidden relative bg-black">
+    <div className="w-screen h-screen overflow-hidden bg-black flex items-center justify-center">
+      <div
+        style={{
+          width: W,
+          height: H,
+          transform: `scale(${scale})`,
+          transformOrigin: "center center",
+          position: "relative",
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
       {/* Slide 1 — Boas-vindas animada */}
       <div
         className={`absolute inset-0 transition-opacity duration-500 ${
@@ -139,6 +163,7 @@ export default function TelaPage() {
           />
         ))}
       </div>
+      </div>{/* fim canvas 1920×1080 */}
     </div>
   );
 }
