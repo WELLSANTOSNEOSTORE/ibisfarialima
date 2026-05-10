@@ -15,7 +15,7 @@ export default function LoginPage() {
     setErro(false);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/neostore-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ login, senha }),
@@ -31,25 +31,31 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
+        {/* Logo Neostore */}
         <div className="flex justify-center mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-[#E8440A] flex items-center justify-center">
-              <span className="text-white font-black text-sm">ibis</span>
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/neostore-logo.png"
+                alt="Neostore"
+                className="w-full h-full object-contain p-2"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                  (e.currentTarget.parentElement as HTMLElement).innerHTML =
+                    '<span style="font-weight:900;font-size:11px;letter-spacing:0.1em;color:#111">NEOSTORE</span>';
+                }}
+              />
             </div>
-            <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Hotel</p>
-              <p className="text-xl font-black text-gray-800 leading-tight">ibis Styles</p>
-              <p className="text-[10px] text-gray-500 tracking-wider leading-none">FARIA LIMA</p>
-            </div>
+            <p className="text-xs text-gray-500 uppercase tracking-widest">Acesso Restrito</p>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <h1 className="text-xl font-black text-gray-800 mb-1">Entrar</h1>
-          <p className="text-sm text-gray-400 mb-6">Painel de Sinalização Digital</p>
+          <p className="text-sm text-gray-400 mb-6">Painel Administrativo</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -62,7 +68,7 @@ export default function LoginPage() {
                 onChange={(e) => setLogin(e.target.value)}
                 autoComplete="username"
                 required
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E8440A] focus:border-transparent transition"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent transition"
               />
             </div>
 
@@ -76,7 +82,7 @@ export default function LoginPage() {
                 onChange={(e) => setSenha(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E8440A] focus:border-transparent transition"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent transition"
               />
             </div>
 
@@ -87,7 +93,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#E8440A] hover:bg-[#c93a08] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 mt-2"
+              className="w-full bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

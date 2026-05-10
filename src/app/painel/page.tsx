@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { upload } from "@vercel/blob/client";
+import { useSession, signOut } from "next-auth/react";
 
 type SalaId = "inter" | "rooftop";
-
 type Orientacao = "landscape" | "portrait";
 
 interface SalaConfig {
@@ -36,7 +36,8 @@ const defaultConfig = (salaId: SalaId): SalaConfig => ({
   orientacao: "landscape",
 });
 
-export default function AdminPage() {
+export default function PainelPage() {
+  const { data: session } = useSession();
   const [sala, setSala] = useState<SalaId>("inter");
   const [config, setConfig] = useState<SalaConfig>(defaultConfig("inter"));
   const [loading, setLoading] = useState(false);
@@ -168,37 +169,31 @@ export default function AdminPage() {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/neostore-logo.png"
-                alt="Neostore"
-                className="w-full h-full object-contain p-1"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                  (e.currentTarget.parentElement as HTMLElement).innerHTML =
-                    '<span style="font-weight:900;font-size:9px;letter-spacing:0.05em;color:#111">NEO</span>';
-                }}
-              />
+            <div className="w-10 h-10 rounded-full bg-[#E8440A] flex items-center justify-center">
+              <span className="text-white font-black text-xs">ibis</span>
             </div>
             <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Painel</p>
-              <p className="text-lg font-black text-gray-800 leading-tight">Neostore</p>
-              <p className="text-[10px] text-gray-500 tracking-wider leading-none">ADMIN</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Hotel</p>
+              <p className="text-lg font-black text-gray-800 leading-tight">ibis Styles</p>
+              <p className="text-[10px] text-gray-500 tracking-wider leading-none">FARIA LIMA</p>
             </div>
           </div>
-          <div className="text-right flex flex-col items-end gap-1">
-            <p className="text-xs text-gray-400 uppercase tracking-widest">Painel de</p>
-            <p className="text-sm font-bold text-gray-700">Sinalização Digital</p>
-            <button
-              onClick={async () => {
-                await fetch("/api/neostore-auth", { method: "DELETE" });
-                window.location.href = "/admin/login";
-              }}
-              className="text-[10px] text-gray-400 hover:text-red-400 transition uppercase tracking-widest"
-            >
-              Sair
-            </button>
+          <div className="flex items-center gap-3">
+            {session?.user?.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={session.user.image} alt="" className="w-8 h-8 rounded-full" />
+            )}
+            <div className="text-right">
+              {session?.user?.name && (
+                <p className="text-xs font-semibold text-gray-700 leading-none">{session.user.name}</p>
+              )}
+              <button
+                onClick={() => signOut({ callbackUrl: "/entrar" })}
+                className="text-[10px] text-gray-400 hover:text-red-400 transition uppercase tracking-widest"
+              >
+                Sair
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -223,7 +218,7 @@ export default function AdminPage() {
             </select>
           </div>
 
-          {/* Orientação da tela */}
+          {/* Orientação */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
               Orientação da tela
@@ -233,33 +228,22 @@ export default function AdminPage() {
                 type="button"
                 onClick={() => setConfig((prev) => ({ ...prev, orientacao: "landscape" }))}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
-                  config.orientacao === "landscape"
-                    ? "border-[#E8440A] bg-orange-50"
-                    : "border-gray-200 hover:border-gray-300"
+                  config.orientacao === "landscape" ? "border-[#E8440A] bg-orange-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                {/* Ícone paisagem */}
                 <div className={`w-14 h-8 rounded border-2 ${config.orientacao === "landscape" ? "border-[#E8440A] bg-orange-100" : "border-gray-400 bg-gray-100"}`} />
-                <span className={`text-xs font-bold ${config.orientacao === "landscape" ? "text-[#E8440A]" : "text-gray-500"}`}>
-                  Horizontal
-                </span>
+                <span className={`text-xs font-bold ${config.orientacao === "landscape" ? "text-[#E8440A]" : "text-gray-500"}`}>Horizontal</span>
                 <span className="text-[10px] text-gray-400">1920 × 1080</span>
               </button>
-
               <button
                 type="button"
                 onClick={() => setConfig((prev) => ({ ...prev, orientacao: "portrait" }))}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
-                  config.orientacao === "portrait"
-                    ? "border-[#E8440A] bg-orange-50"
-                    : "border-gray-200 hover:border-gray-300"
+                  config.orientacao === "portrait" ? "border-[#E8440A] bg-orange-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                {/* Ícone retrato */}
                 <div className={`w-8 h-14 rounded border-2 ${config.orientacao === "portrait" ? "border-[#E8440A] bg-orange-100" : "border-gray-400 bg-gray-100"}`} />
-                <span className={`text-xs font-bold ${config.orientacao === "portrait" ? "text-[#E8440A]" : "text-gray-500"}`}>
-                  Vertical
-                </span>
+                <span className={`text-xs font-bold ${config.orientacao === "portrait" ? "text-[#E8440A]" : "text-gray-500"}`}>Vertical</span>
                 <span className="text-[10px] text-gray-400">1080 × 1920</span>
               </button>
             </div>
@@ -299,7 +283,7 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Checkbox buscar logo no sistema */}
+              {/* Checkbox logo sistema */}
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -314,48 +298,23 @@ export default function AdminPage() {
                 </label>
               </div>
 
-              {/* Lista de logos do sistema */}
               {buscarLogoSistema && (
                 <div className="border border-gray-200 rounded-xl overflow-hidden">
                   <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                      Logos salvos no sistema
-                    </p>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Logos salvos no sistema</p>
                   </div>
                   {logos.length === 0 ? (
                     <div className="px-4 py-8 text-center">
                       <p className="text-sm text-gray-400">Nenhum logo salvo ainda.</p>
-                      <p className="text-xs text-gray-300 mt-1">
-                        Faça upload de uma logo e clique em "Salvar no sistema".
-                      </p>
                     </div>
                   ) : (
                     <ul className="divide-y divide-gray-100">
                       {logos.map((logo) => (
                         <li key={logo.id} className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition">
-                          <Image
-                            src={logo.url}
-                            alt={logo.nome}
-                            width={64}
-                            height={32}
-                            className="object-contain h-8 w-16 rounded"
-                            unoptimized
-                          />
-                          <span className="flex-1 text-sm font-semibold text-gray-700 truncate">
-                            {logo.nome}
-                          </span>
-                          <button
-                            onClick={() => handleSelecionarLogo(logo)}
-                            className="text-xs font-bold text-[#E8440A] hover:underline"
-                          >
-                            Usar
-                          </button>
-                          <button
-                            onClick={() => handleDeletarLogo(logo.id)}
-                            className="text-xs text-gray-300 hover:text-red-400 transition"
-                          >
-                            ✕
-                          </button>
+                          <Image src={logo.url} alt={logo.nome} width={64} height={32} className="object-contain h-8 w-16 rounded" unoptimized />
+                          <span className="flex-1 text-sm font-semibold text-gray-700 truncate">{logo.nome}</span>
+                          <button onClick={() => handleSelecionarLogo(logo)} className="text-xs font-bold text-[#E8440A] hover:underline">Usar</button>
+                          <button onClick={() => handleDeletarLogo(logo.id)} className="text-xs text-gray-300 hover:text-red-400 transition">✕</button>
                         </li>
                       ))}
                     </ul>
@@ -365,9 +324,7 @@ export default function AdminPage() {
 
               {/* Upload de logo */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
-                  Logo do cliente
-                </label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Logo do cliente</label>
                 <div
                   className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#E8440A] transition group"
                   onClick={() => fileInputRef.current?.click()}
@@ -392,7 +349,6 @@ export default function AdminPage() {
                   )}
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={handleFileChange} className="hidden" />
-
                 {logoPreview && (
                   <div className="mt-2 flex items-center gap-3">
                     <button
@@ -419,7 +375,7 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Toggle — Evento */}
+              {/* Toggle evento */}
               <div className="flex items-center justify-between py-4 border-t border-gray-100">
                 <div>
                   <p className="text-sm font-semibold text-gray-700">Mostrar informações do evento?</p>
@@ -435,13 +391,10 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              {/* Seção de Vídeo */}
+              {/* Vídeo */}
               <div className="pt-2 border-t border-gray-100 space-y-4">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Vídeo
-                </label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Vídeo</label>
 
-                {/* Upload de arquivo */}
                 <div>
                   <label className="block text-xs text-gray-400 mb-2">Upload do computador (MP4 até 500 MB)</label>
                   <div
@@ -451,10 +404,7 @@ export default function AdminPage() {
                     {uploadingVideo ? (
                       <div className="w-full flex flex-col items-center gap-2">
                         <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="h-2 bg-[#E8440A] rounded-full transition-all duration-300"
-                            style={{ width: `${uploadVideoProgress}%` }}
-                          />
+                          <div className="h-2 bg-[#E8440A] rounded-full transition-all duration-300" style={{ width: `${uploadVideoProgress}%` }} />
                         </div>
                         <p className="text-xs text-gray-500">Enviando… {uploadVideoProgress}%</p>
                       </div>
@@ -472,26 +422,16 @@ export default function AdminPage() {
                       </>
                     )}
                   </div>
-                  <input
-                    ref={videoInputRef}
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime"
-                    onChange={handleVideoFileChange}
-                    className="hidden"
-                  />
-                  {uploadVideoError && (
-                    <p className="mt-2 text-xs text-red-500">{uploadVideoError}</p>
-                  )}
+                  <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleVideoFileChange} className="hidden" />
+                  {uploadVideoError && <p className="mt-2 text-xs text-red-500">{uploadVideoError}</p>}
                 </div>
 
-                {/* Separador */}
                 <div className="flex items-center gap-3">
                   <div className="flex-1 h-px bg-gray-100" />
                   <span className="text-xs text-gray-400">ou cole uma URL</span>
                   <div className="flex-1 h-px bg-gray-100" />
                 </div>
 
-                {/* Input de URL */}
                 <div>
                   <div className="flex gap-2">
                     <input
@@ -513,20 +453,12 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* Preview do vídeo */}
                 {config.videoUrl && !uploadingVideo && (
                   <div className="rounded-xl overflow-hidden border border-gray-200 bg-black">
-                    <video
-                      key={config.videoUrl}
-                      src={config.videoUrl}
-                      controls
-                      muted
-                      className="w-full max-h-48 object-contain"
-                    />
+                    <video key={config.videoUrl} src={config.videoUrl} controls muted className="w-full max-h-48 object-contain" />
                   </div>
                 )}
 
-                {/* Toggle — Vídeo */}
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-gray-700">Mostrar vídeo?</p>

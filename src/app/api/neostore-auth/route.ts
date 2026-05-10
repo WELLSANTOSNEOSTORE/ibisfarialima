@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   res.cookies.set("ibis_auth", "ok", {
     httpOnly: true,
     path: "/",
-    maxAge: 60 * 60 * 8, // 8 horas
+    maxAge: 60 * 60 * 8,
     sameSite: "lax",
   });
   return res;
